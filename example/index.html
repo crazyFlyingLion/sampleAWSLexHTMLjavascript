@@ -20,13 +20,13 @@
     </p>
     <p><span id="message"></span></p>
     <p>
-        <input type="password" id="ACCESS_ID" name="ACCESS ID" placeholder="ACCESS ID" value=""/>
+        <input type="password" id="ACCESS_ID" name="ACCESS ID" placeholder="ACCESS ID" value="AKIA4DEVE3BBL2EJQXVU"/>
     </p>
     <p>
-        <input type="password" id="SECRET_KEY" name="SECRET KEY" placeholder="SECRET KEY" value=""/>
+        <input type="password" id="SECRET_KEY" name="SECRET KEY" placeholder="SECRET KEY" value="Nb8/Ue9tt0OODWani/AloMFuQ395GX5zWzltN8+Z"/>
     </p>
     <p>
-        <input type="text" id="BOT" name="BOT" placeholder="BOT" value=""/>
+        <input type="text" id="BOT" name="BOT" placeholder="BOT" value="SearchFlight"/>
     </p>
 </div>
 <script src="https://sdk.amazonaws.com/js/aws-sdk-2.48.0.min.js"></script>
@@ -43,7 +43,11 @@
         AWS.config.credentials = new AWS.Credentials(document.getElementById('ACCESS_ID').value, document.getElementById('SECRET_KEY').value, null);
         AWS.config.region = 'us-east-1';
         
-        config = {
+        config = {silenceDetection: true,
+            silenceDetectionConfig: {
+                time: 1500,
+                amplitude: 0.2
+            },
             lexConfig: { botName: document.getElementById('BOT').value }
         };
 
@@ -57,6 +61,9 @@
             }
         }, function (data) {
             console.log('Transcript: ', data.inputTranscript, ", Response: ", data.message);
+            if (data.dialogState === 'Fulfilled'){
+                console.log(data.slots);
+            }
         }, function (error) {
             message.textContent = error;
         }, function (timeDomain, bufferLength) {
