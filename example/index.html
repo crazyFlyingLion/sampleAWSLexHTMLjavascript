@@ -49,115 +49,19 @@
     var offerIds = [];
     var offerFares = [];
 
+    // Input the identity pool id you received from AWS Cognito below
+    const cognitoPoolId = "{insert-cognito-identity-pool-id}";
+    // Input the API key for making Cathay Pacific API calls
+    const apiKey = "{insert-cathay-pacific-api-key}";
+
     message.textContent = 'Press to Start Conversations';
 
-    // document.getElementById('testSearchAPI').onclick = async function (){
-
-    //     document.getElementById('flightsSearchResult').innerHTML = null;
-        
-    //     try{
-    //         document.getElementById('displayMsg').innerHTML = 'Searching Matched & Available Flights ...';
-    //         const flightResults = await searchFlight('HKG', 'TPE', '2019-10-20', '2019-10-22', '1');
-    //         var offersCount = Object.keys(flightResults.offers).length;
-            
-    //         if (offersCount > 10){
-                
-    //             var table = "<table><tr><th>Options</th>" +
-    //                         "<th>Departing Flight Number</th>" +
-    //                         "<th>Departure Time</th>" +
-    //                         "<th>Arrival Time</th>" +
-    //                         "<th>Returning Flight Number</th>" +
-    //                         "<th>Departure Time</th>" +
-    //                         "<th>Arrival Time</th>" +
-    //                         "<th>Total Fare</th>" +
-    //                         "</tr>";
-                
-    //             offerIds = [];
-    //             offerFares = [];
-
-    //             for (var i = 0; i < 10; i++) {
-    //                 var optionNum = i + 1;
-
-    //                 table += '<tr><td>' + 'Option ' + optionNum.toString() +
-    //                 '</td><td>' + flightResults.offers[i].outbound.segments[0].flightNum +
-    //                 '</td><td>' + flightResults.offers[i].outbound.segments[0].departureTime +
-    //                 '</td><td>' + flightResults.offers[i].outbound.segments[0].arrivalTime +
-    //                 '</td><td>' + flightResults.offers[i].inbound.segments[0].flightNum +
-    //                 '</td><td>' + flightResults.offers[i].inbound.segments[0].departureTime +
-    //                 '</td><td>' + flightResults.offers[i].inbound.segments[0].arrivalTime +
-    //                 '</td><td>' + flightResults.offers[i].totalAmount + '</td></tr>';
-
-    //                 offerIds.push(flightResults.offers[i].offerId);
-    //                 offerFares.push(flightResults.offers[i].totalAmount);
-    //             }
-
-    //             table += "</table>";
-    //             document.getElementById("flightsSearchResult").innerHTML = table;
-    //             document.getElementById('displayMsg').innerHTML = 'Here are the flight options provided per your request:';
-
-    //             console.log(offerIds);
-    //             console.log(offerFares);
-
-    //         }
-    //         else{
-    //             document.getElementById('displayMsg').innerHTML = 'Sorry, no matched flights found. Please try other dates or destinations.';
-    //             document.getElementById('flightsSearchResult').innerHTML = null;
-    //         }
-    //     }catch (error) {
-    //         console.error(error);
-    //     }
-    // }
-
-    // document.getElementById('testPurchaseAPI').onclick = async function (){
-
-    //     console.log(offerIds);
-    //     console.log(offerFares);
-        
-    //     try{
-    //         document.getElementById('displayMsg').innerHTML = 'Booking Flights ... It may take 10-30 seconds.';
-            
-    //         var optionNumber = 1;
-
-    //         const purchaseResults = await bookFlight({
-    //             "offerId": offerIds[optionNumber],
-    //             "numPax": 1,
-    //             "amount": offerFares[optionNumber],
-    //             "paxDetails": [
-    //                 {
-    //                     "countryDialingCode": "852",
-    //                     "phoneNumber": "88888888",
-    //                     "emailAddress": "demouser@demo.com",
-    //                     "titleName": "MR",
-    //                     "givenName": "Demo",
-    //                     "familyName": "Man",
-    //                     "birthdate": "1990-01-01"
-    //                 }
-    //             ]
-    //         });
-            
-    //         console.log(purchaseResults);
-
-    //         var ticketsCount = Object.keys(purchaseResults.tickets).length;
-            
-    //         if (ticketsCount > 0){
-    //             var BookingRef = 'Booking Reference: ' + purchaseResults.bookingRef;
-    //             var TicketNum = 'Ticket Number: ' + purchaseResults.tickets[0].ticketNumber;
-                     
-    //             document.getElementById('displayMsg').innerHTML = BookingRef + " || " + TicketNum;
-    //         }
-    //         else{
-    //             document.getElementById('displayMsg').innerHTML = 'Sorry, the purchase is not successful';
-    //         }
-    //     }catch (error) {
-    //         console.error(error);
-    //     }
-    // }
-
+    // Capture user vocal through device microphone, and send audio to Amazon Lex to initiate chats 
     document.getElementById('audio-control').onclick = function () {
 
         //Input the identity pool id you received from AWS Cognito below
         AWS.config.credentials = new AWS.CognitoIdentityCredentials({
-            IdentityPoolId: '{Input-Your-Identity-Pool-Id}',
+            IdentityPoolId: cognitoPoolId,
         });
         AWS.config.region = 'us-east-1';
         
@@ -291,18 +195,18 @@
         conversation.advanceConversation();
     };
 
-    //Call Search flight API
+    // Call Search flight API
     async function searchFlight(origin, destination, departureDate, returnDate, numPax){
         console.log(origin, destination, departureDate, returnDate, numPax);
 
         url = "https://t0.api.osc1.ct1.cathaypacific.com/hackathon-apigw/api/v1/flightSearch?" + "origin=" + origin + "&destination=" + destination + "&departureDate=" + departureDate + "&returnDate=" + returnDate + "&cabin=" + "Y" + "&numPax=" + numPax;
         console.log(url);
 
-        //insert API Key below in order to make the API call
+        // Input the API key for making Cathay Pacific API calls
         const response = await fetch(url, {
             method: 'GET',
             headers: {
-                'apikey': '{insert-api-key-here}'
+                'apikey': apiKey
             }
         });
 
@@ -310,17 +214,17 @@
 
     }
 
-    //Call Purchase Ticket API
+    // Call Purchase Ticket API
     async function bookFlight(body){
 
         url = "https://t0.api.osc1.ct1.cathaypacific.com/hackathon-apigw/api/v1/ticketPurchase";
         console.log(url);
 
-        //insert API Key below in order to make the API call
+        // Input the API key for making Cathay Pacific API calls
         const response = await fetch(url, {
             method: 'POST',
             headers: {
-                'apikey': '{insert-api-key-here}',
+                'apikey': apiKey,
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify(body)
@@ -329,6 +233,108 @@
         return await response.json();
 
     }
+    
+    // document.getElementById('testSearchAPI').onclick = async function (){
+
+    //     document.getElementById('flightsSearchResult').innerHTML = null;
+        
+    //     try{
+    //         document.getElementById('displayMsg').innerHTML = 'Searching Matched & Available Flights ...';
+    //         const flightResults = await searchFlight('HKG', 'TPE', '2019-10-20', '2019-10-22', '1');
+    //         var offersCount = Object.keys(flightResults.offers).length;
+            
+    //         if (offersCount > 10){
+                
+    //             var table = "<table><tr><th>Options</th>" +
+    //                         "<th>Departing Flight Number</th>" +
+    //                         "<th>Departure Time</th>" +
+    //                         "<th>Arrival Time</th>" +
+    //                         "<th>Returning Flight Number</th>" +
+    //                         "<th>Departure Time</th>" +
+    //                         "<th>Arrival Time</th>" +
+    //                         "<th>Total Fare</th>" +
+    //                         "</tr>";
+                
+    //             offerIds = [];
+    //             offerFares = [];
+
+    //             for (var i = 0; i < 10; i++) {
+    //                 var optionNum = i + 1;
+
+    //                 table += '<tr><td>' + 'Option ' + optionNum.toString() +
+    //                 '</td><td>' + flightResults.offers[i].outbound.segments[0].flightNum +
+    //                 '</td><td>' + flightResults.offers[i].outbound.segments[0].departureTime +
+    //                 '</td><td>' + flightResults.offers[i].outbound.segments[0].arrivalTime +
+    //                 '</td><td>' + flightResults.offers[i].inbound.segments[0].flightNum +
+    //                 '</td><td>' + flightResults.offers[i].inbound.segments[0].departureTime +
+    //                 '</td><td>' + flightResults.offers[i].inbound.segments[0].arrivalTime +
+    //                 '</td><td>' + flightResults.offers[i].totalAmount + '</td></tr>';
+
+    //                 offerIds.push(flightResults.offers[i].offerId);
+    //                 offerFares.push(flightResults.offers[i].totalAmount);
+    //             }
+
+    //             table += "</table>";
+    //             document.getElementById("flightsSearchResult").innerHTML = table;
+    //             document.getElementById('displayMsg').innerHTML = 'Here are the flight options provided per your request:';
+
+    //             console.log(offerIds);
+    //             console.log(offerFares);
+
+    //         }
+    //         else{
+    //             document.getElementById('displayMsg').innerHTML = 'Sorry, no matched flights found. Please try other dates or destinations.';
+    //             document.getElementById('flightsSearchResult').innerHTML = null;
+    //         }
+    //     }catch (error) {
+    //         console.error(error);
+    //     }
+    // }
+
+    // document.getElementById('testPurchaseAPI').onclick = async function (){
+
+    //     console.log(offerIds);
+    //     console.log(offerFares);
+        
+    //     try{
+    //         document.getElementById('displayMsg').innerHTML = 'Booking Flights ... It may take 10-30 seconds.';
+            
+    //         var optionNumber = 1;
+
+    //         const purchaseResults = await bookFlight({
+    //             "offerId": offerIds[optionNumber],
+    //             "numPax": 1,
+    //             "amount": offerFares[optionNumber],
+    //             "paxDetails": [
+    //                 {
+    //                     "countryDialingCode": "852",
+    //                     "phoneNumber": "88888888",
+    //                     "emailAddress": "demouser@demo.com",
+    //                     "titleName": "MR",
+    //                     "givenName": "Demo",
+    //                     "familyName": "Man",
+    //                     "birthdate": "1990-01-01"
+    //                 }
+    //             ]
+    //         });
+            
+    //         console.log(purchaseResults);
+
+    //         var ticketsCount = Object.keys(purchaseResults.tickets).length;
+            
+    //         if (ticketsCount > 0){
+    //             var BookingRef = 'Booking Reference: ' + purchaseResults.bookingRef;
+    //             var TicketNum = 'Ticket Number: ' + purchaseResults.tickets[0].ticketNumber;
+                     
+    //             document.getElementById('displayMsg').innerHTML = BookingRef + " || " + TicketNum;
+    //         }
+    //         else{
+    //             document.getElementById('displayMsg').innerHTML = 'Sorry, the purchase is not successful';
+    //         }
+    //     }catch (error) {
+    //         console.error(error);
+    //     }
+    // }
 
 </script>
 </body>
